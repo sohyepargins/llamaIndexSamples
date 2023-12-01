@@ -41,12 +41,10 @@ import streamlit as st
 
 
 
-# Now let's write a function
-
-
+print("***Streamlit LlamaIndex Documentation Helper")
 # The function will return us to the VectorStoreIndex of LlamaIndex
-# Also make sure to move the pinecone client into the function bc we want to run only when the function is called.
-@st.cache_resource(show_spinner=False)
+@st.cache_resource(show_spinner=False) # Also make sure to move the pinecone client into the function bc we want to run only when the function is called.
+# We're wrapping the function below
 def get_index()-> VectorStoreIndex:  
     
     pinecone.init(api_key=os.environ["PINECONE_API_KEY"],
@@ -62,10 +60,18 @@ def get_index()-> VectorStoreIndex:
         
     return  VectorStoreIndex.from_vector_store(vector_store=vector_store, service_context=service_context)
 
-index = get_index()
+index = get_index() #remember the output of get_index() is VectorStoreIndex
+        #By default, streamlit is a while loop; Keep running main.py over and over again.
+        #To pervent this, we're getting cacheing of the result of get_index (i.e., VectorStoreIndex here)
+        
+
+# Stream lit session states helps the varibles to persist, instead of being overwritten every time a loop is running.
+# Every state in the session ("session state") has a data type of dictionary.
+# That's why we're using .keys() method below.     
 if "chat_engine" not in st.session_state.keys():
     st.session_state.chat_engine = index.as_chat_engine(chat_mode="react", verbose = True)
-        
+                    #We created a session state called "chat_engine" and it's bascially VectoreStoreIndex.as_chat_engine
+
 st.set_page_config(page_title="Chat with LlamaIndex docs powered by llamaIndex ",
                        page_icon="🦙",
                        layout = "centered",
@@ -74,15 +80,10 @@ st.set_page_config(page_title="Chat with LlamaIndex docs powered by llamaIndex "
                        )
 st.title("Chat with LlamaIndex docs 🦙")
     
-    #This way everytime we run this function, we will create a new connection to the Pinecone vectorstore.
-    #We don't want this because we have one single connection for our entire session. 
-    # ---> wrap the entire function into the function with streamlit's cache resource
-    # In the Steramlit session, we will recycle the object called in the session (aka. connection recycling)
-    
-    #We're using chat engine replacing query engine which remember the query.
 
-#Then in the terminal, run in the terminal %streamlit run main.py
+#Then in the terminal, run in the terminal %streamlit run main.py to check
 
+#If session state named "messages" doesn't exist, we want to initialize it.
 if "messages" not in st.session_state.keys():
     st.session_state.messages=[
         {
@@ -96,9 +97,10 @@ if prompt := st.chat_input("Your question"):
         "role": "user",
         "content": prompt
     })
-   
+  
+# Basically priniting out the session state variable 
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
+    with st.chat_message(message["role"]): #Steramlit's context manager chat_message will return an avatar.
         st.write(message["content"])
         
 
