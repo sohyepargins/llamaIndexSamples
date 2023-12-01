@@ -104,12 +104,12 @@ for message in st.session_state.messages:
         st.write(message["content"])
         
 
-if st.session_state.messages[-1]["role"] != "assistant":
-    with st.chat_message("assistant"):
+if st.session_state.messages[-1]["role"] != "assistant": #is it's a user message
+    with st.chat_message("assistant"): #We want to put assistant avatar in the answer
         with st.spinner("Thinking..."):
-            response = st.session_state.chat_engine.chat(message=prompt)
-            st.write(response.response)
-            message = {
+            response = st.session_state.chat_engine.chat(message=prompt) #access the chat engine
+            st.write(response.response) #get the response
+            message = {        #The following lines are appending the results to our "messages" session state.
                 "role": "assistant",
                 "content":response.response
             }
